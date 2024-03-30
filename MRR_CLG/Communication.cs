@@ -1,42 +1,51 @@
 // communicate with robots
-using System.Threading.Tasks;
-using System.Text;
-using System.Net.Sockets;
-using System.Net;
-using System.Net.Cache;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections.ObjectModel; //ObservableCollection
+using System.ComponentModel;
+using System.Data; //INotifyPropertyChanged
 
 namespace MRR_CLG
 {
 
-/*
-
-Reset status = 1 where status = 4
-newstatus = -1
-Get all commands where status >= 3 and status <= 4
-    If status = 3 
-        if robot command
-            Send command to robot
-            NewStatus = 4 (wait) or 5 (do not wait)
-    else //status = 4
-        // Check for reply from robots
-        if received, newstatus = 5
-
-    if newstatus >-1, update status in database
-
-*/
-
-// check for connection to each active robot
-
-    public class CommandListProcessor
+    public class RobotConnections : ObservableCollection<RobotConnection>
     {
-        public void ProcessList
+        public RobotConnections()
+            : base()
         {
-
-            while(true)  // continue to execute commands while they exist
-            {
-
-            }
         }
+
+        public RobotConnection AddRobot(int pRobotID)
+        {
+            RobotConnection newbot = new RobotConnection(pRobotID);
+            this.Add(newbot);
+            return newbot;
+        }
+
+        public bool SendMessageToRobot(int robotID, string MessageToSend)
+        {
+            RobotConnection useRobot = this.FirstOrDefault(r=>r.RobotID == robotID);
+            return useRobot.SendMessage(MessageToSend);
+        }
+    }
+
+    public class RobotConnection
+    {
+        public RobotConnection(int pRobotID):base()
+        {
+            RobotID = pRobotID;
+            // get mac id for robot
+            // and connect
+        }
+
+        public bool SendMessage(string MessageToSend)
+        {
+            return false;
+        }
+
+        public int RobotID { get; set; }
+        public bool ISConnected { get; set; }
+
     }
 
 }

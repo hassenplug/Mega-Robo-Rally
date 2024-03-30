@@ -25,6 +25,9 @@ namespace MRR_CLG
         private static LEDs rLED = new LEDs(rDBConn);
 
         private static DBEditor rdbeditor = new DBEditor(rDBConn);
+
+        private static CommandListProcessor rCommandProcessor = new CommandListProcessor(rDBConn);
+
         private static Dictionary<IPAddress, TcpClient> clientlist = new Dictionary<IPAddress, TcpClient>();
 
 

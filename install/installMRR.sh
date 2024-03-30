@@ -100,3 +100,7 @@ sudo mysql < /boot/firmware/InstallFiles/install/SRRDatabase.sql
 
 dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
 dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
+
+# endable spi
+# https://raspberrypi.stackexchange.com/questions/127793/raspberry-pi-4b-no-dev-spidev0-0
+#This can also be done manually by editing /boot/config.txt and uncommenting the line #dtparam=spi=on.

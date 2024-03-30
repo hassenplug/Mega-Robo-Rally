@@ -15,28 +15,6 @@ namespace MRR_CLG
             DBConn = ldb;
         }
 
-
-        // function to wait for reply from robots
-        // wait for reply from robots
-
-        // wait for input from users
-
-        // process all commands
-        public string ProcessCommand()
-        {
-            // find list of commands
-            // send commands to robots
-
-
-            while(true)
-            {
-
-            }
-            //return null;
-        }
-
-        public string ProcessCommands()
-        {
             // get database state
             // switch & process it
 
@@ -54,8 +32,6 @@ namespace MRR_CLG
             //Thread t = new Thread(new ThreadStart(worker.Start));
             //t.Start();
 
-            return null;
-        }
 
 
     }
