@@ -25,4 +25,18 @@ Get all commands where status >= 3 and status <= 4
 
 */
 
+// check for connection to each active robot
+
+    public class CommandListProcessor
+    {
+        public void ProcessList
+        {
+
+            while(true)  // continue to execute commands while they exist
+            {
+
+            }
+        }
+    }
+
 }
