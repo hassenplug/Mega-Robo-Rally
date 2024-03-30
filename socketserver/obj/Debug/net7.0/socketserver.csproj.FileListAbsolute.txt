@@ -1,0 +1,14 @@
+/home/mrr/server/socketserver/bin/Debug/net7.0/soc
+/home/mrr/server/socketserver/bin/Debug/net7.0/soc.deps.json
+/home/mrr/server/socketserver/bin/Debug/net7.0/soc.runtimeconfig.json
+/home/mrr/server/socketserver/bin/Debug/net7.0/soc.dll
+/home/mrr/server/socketserver/bin/Debug/net7.0/soc.pdb
+/home/mrr/server/socketserver/obj/Debug/net7.0/socketserver.GeneratedMSBuildEditorConfig.editorconfig
+/home/mrr/server/socketserver/obj/Debug/net7.0/socketserver.AssemblyInfoInputs.cache
+/home/mrr/server/socketserver/obj/Debug/net7.0/socketserver.AssemblyInfo.cs
+/home/mrr/server/socketserver/obj/Debug/net7.0/socketserver.csproj.CoreCompileInputs.cache
+/home/mrr/server/socketserver/obj/Debug/net7.0/soc.dll
+/home/mrr/server/socketserver/obj/Debug/net7.0/refint/soc.dll
+/home/mrr/server/socketserver/obj/Debug/net7.0/soc.pdb
+/home/mrr/server/socketserver/obj/Debug/net7.0/socketserver.genruntimeconfig.cache
+/home/mrr/server/socketserver/obj/Debug/net7.0/ref/soc.dll

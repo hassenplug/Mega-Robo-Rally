@@ -1,0 +1,242 @@
+
+<!--
+	
+function ShowGraph($value,$max,$color,$height=25)
+{
+	if ($max<15)
+	{
+		print "<table border=0 height=" . $height . " width=100%><tr>";
+		for ($c1=0;$c1<$max;$c1++)
+		{
+			print "<td bgcolor=";
+			if ($c1<$value) print $color;
+			else print "ffffff";
+			print "> </td>";
+		}
+		print "</tr></table>";
+		//
+	}
+	else
+	{
+		print "<table border=0 height=" . $height . " width=100%><tr>";
+		if ($value>0)
+		{
+			print "<td bgcolor=";
+			print $color;
+			print " width=";
+			print 100*$value/$max;
+			print "%></td>";
+		}
+		if ($value<$max)
+		{
+			print "<td bgcolor=e0e0e0></td>";
+		}
+		print "</tr></table>";
+	}
+}
+	
+-->
+
+<html>
+<head>
+
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<link rel="stylesheet" type="text/css" href="checkbox.css">
+<link rel="stylesheet" type="text/css" href="button.css">
+<link rel="stylesheet" type="text/css" href="w3.css">
+
+<meta name="theme-color" content="#aaffff">
+
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<script src="jquery.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="programscript.js" type="text/javascript" charset="utf-8"></script>
+
+<script src="showplayerdirection.js" type="text/javascript" charset="utf-8"></script>
+<script >
+    function showplayerprogram(pl)
+    {
+        var x = $("#playerprogram");
+		var y = $("#body");
+        if (x.css('display') === "none") {
+            autorefresh = false;
+
+            x.load("programTable.php?ShowID=" + pl,function() {
+				var y = $("#body");
+				var x = $("#playerprogram")[0].getBoundingClientRect();
+				y.css("padding-bottom",x.height);
+			} );
+
+            x.css("display","block");
+        } else {
+            x.css("display","none");
+			y.css("padding-bottom","0px");
+            x.html("");
+            autorefresh = true;
+            CheckUpdate();
+        }
+    }
+    var autorefresh = true;
+</script>
+
+<title>Super Robo Rally</title>
+
+<style>
+a:link {
+    text-decoration: none;
+	color: #000000;
+}
+
+a:visited {
+    text-decoration: none;
+	color: #000000;
+}
+
+td {
+	background-color: #e0e0e0;
+}
+</style>
+
+</head>
+<body id='body' style='padding:5px; padding-top:27px' bgcolor='<?=$playerColor ?>'>
+
+<table bgcolor="ffffff" border=0 width=100%>
+<tr bgcolor="#d0d0d0"><td>Robot</td>
+<td align=center>Flags</td>
+<td align=center>Status</td>
+</tr>
+<tr>
+<td align=center>
+
+<a " . $playerA . " href='playerprogramTable.php'>
+<button class='button' style='background-color:ffdddd; color:000000'>
+RobotName
+</button>
+</a>
+</td>
+<td align=center bgcolor='#e0e0e0'>
+$player["CurrentFlag"];
+/
+$TotalFlags
+<br>
+ShowGraph((int)$player["CurrentFlag"],(int)$TotalFlags,"00ff00",18);
+</td>
+
+	print "</tr>";
+
+	$playerCount = $player["RobotID"];
+
+	//print "<tr id='playerprogram" . $player["RobotID"] . "'  style='display:none;'>";
+	//print "</tr>";
+	
+//include "programTable.php";
+
+	if (isset($_SESSION['ShowOptions']) && $_SESSION['ShowOptions']=='true')
+	{
+		// find options:
+		//$optCount = 0;
+		//$optionText = "";
+		//$optStart = "";
+		/*
+		foreach($player->OptionCards->children() as $Option) // options
+		{
+			$optCount++;
+			$optionText = $optionText . "" . $Option->Name . "<br>";
+			$optStart = "</td><td>";
+		}
+		print $optStart . $optionText;
+		*/
+		if (GAME_PHASE == 0)
+		{
+    		$sql = "Select * from RobotOptions inner join Options on RobotOptions.OptionID=Options.OptionID where RobotID=" . $player["RobotID"] . ";";
+    		if ($OptionCards = $conn->query($sql)) {
+    			print "<tr><td bgcolor=f8f8f8></td><td colspan=3 bgcolor=eeeeee>";
+    			while($OptionCard = $OptionCards->fetch_assoc())
+    			{
+		//$OptionName = str_replace("[quantity]",$Option["Quantity"],$Option["Name"]);
+		            print str_replace("[quantity]",$OptionCard["Quantity"],$OptionCard["Name"]) . "<br>";
+    				//print $OptionCard["Name"] . "<br>";
+    			}
+    			print "</td></tr>";
+    		}
+		}
+		else
+		{
+		    
+    		$sql = "Select * from viewCommandList where RobotID=" . $player["RobotID"] . " and StatusID>1 and CommandTypeID=43 and Turn=" . GAME_TURN . ";";
+    		if ($OptionCards = $conn->query($sql)) {
+    			while($OptionCard = $OptionCards->fetch_assoc())
+    			{
+        			print "<tr><td bgcolor=eeeeee>";
+        			print "P:" . $OptionCard["Phase"];
+        			print "</td><td colspan=3 bgcolor=eeeeee>";
+    				print $OptionCard["Description"];
+    				print "</td></tr>";
+    			}
+    		}
+		}
+	}
+
+	$ActivePlayer = $master || ($PlayerID == $player["RobotID"]);
+
+	$FillStatusString = $FillStatusString . "$.get( 'playerStatus.php?ShowID=" . $player["RobotID"] . "&IsActivePlayer=" . $ActivePlayer. "', function(data ) { $('#playerStatus" . $player["RobotID"] ."').replaceWith(data); }); ";
+}
+
+?></table>
+
+<?PHP
+
+/* free result set */
+$PlayerData->close();
+
+?>
+
+<script>
+function FillStatus()
+{
+<?PHP
+
+print $FillStatusString;
+?>
+}
+FillStatus();
+
+</script>
+
+<?PHP
+if (!$foundPlayer)
+{
+?>
+<a name='players'></a>
+<hr>
+<?PHP
+include "login_footer.php";
+}
+else
+{
+	include 'watcherInclude.php';
+}
+
+ if ($master)
+ {
+	include 'GM_footer.php';
+	include 'GM_master_controls.php';
+
+ }
+ else
+ {
+	print "<div style='position:fixed;top:0;left:0;right:0'>";
+	print "<table width=100% bgcolor=" . $playerColor . " ><tr>";
+	print "<td align=left width=30% style='color:#" . $playerFGColor . ";padding-left: 10px;' >Turn: " . GAME_TURN . "</td>";
+	print "<td align=center width=40% style='color:#" . $playerFGColor . "' onclick='showplayerprogram(" . $PlayerID . ");'>" . $playerName . "</td>";
+	print "<td align=right width=30% style='padding-right: 10px'><a style='color:#" . $playerFGColor . "' href='config.php' >☰</a></td>";
+	print "</tr></table>";
+	print "</div>";
+
+ }
+ 
+
+?><br>
+<div id='playerprogram'  style='display:none;position:fixed;bottom:0;left:0;right:0;' ></div>
+
+</body>
+</html>
