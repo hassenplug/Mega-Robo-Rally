@@ -1257,34 +1257,12 @@ namespace MRR_CLG
         /// </summary>
         public void LoadRobots()
         {
-            AllPlayers = new Players();
-
-            string strSQL = "Select RobotID,CurrentFlag,Lives,Damage,ShutDown,Status,CurrentPosRow,CurrentPosCol,CurrentPosDir,Priority,Energy,PlayerSeat from Robots where Status <> 10;";
-            MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
-            while (reader.Read())
-            {
-                Player newPlayer = new Player(this,reader);
-                AllPlayers.Add(newPlayer);
-//                Console.WriteLine(newPlayer.Name + " " + newPlayer.DamagePoints);
-            }
-
-            reader.Close();
-
+            AllPlayers = new Players(this);
         }
 
         public Player LoadOneRobot(int RobotID)
         {
-            Player newPlayer = new Player(this, 0);
-            string strSQL = "Select RobotID,CurrentFlag,Lives,Damage,ShutDown,Status,CurrentPosRow,CurrentPosCol,CurrentPosDir from Robots where Status <> 10 and RobotID=" + RobotID + ";";
-            MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
-            while (reader.Read())
-            {
-                newPlayer = new Player(this, reader);
-            }
-
-            reader.Close();
-            return newPlayer;
-
+            return new Players(this,RobotID).FirstOrDefault();
         }
 
 

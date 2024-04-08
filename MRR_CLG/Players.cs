@@ -85,6 +85,23 @@ namespace MRR_CLG
 
         }
 
+        public Players(RRGame rRGame, int RobotID = 0) // 0 = all
+        {
+            string strSQL = "Select RobotID,CurrentFlag,Lives,Damage,ShutDown,Status,CurrentPosRow,CurrentPosCol,CurrentPosDir,Priority,Energy,PlayerSeat from Robots where Status <> 10 ";
+            if (RobotID > 0) strSQL += " and RobotID=" + RobotID ;
+            strSQL += ";";
+
+            MySqlConnector.MySqlDataReader reader = rRGame.DBConn.Exec(strSQL);
+            while (reader.Read())
+            {
+                Player newPlayer = new Player(rRGame,reader);
+                this.Add(newPlayer);
+//                Console.WriteLine(newPlayer.Name + " " + newPlayer.DamagePoints);
+            }
+
+            reader.Close();
+        }
+
         public Player GetPlayer(int p_PlayerID)
         {
             return GetPlayer(pl => pl.ID == p_PlayerID);
@@ -104,7 +121,6 @@ namespace MRR_CLG
         {
             this.Select(ts => { ts.ArchivePos.SetLocation(ts.CurrentPos); return ts; }).ToList();
         }
-
 
     }
 

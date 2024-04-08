@@ -7,6 +7,7 @@ using System.ComponentModel;//INotifyPropertyChanged
 //using System.Windows.Media; // brushes
 using System.Xml.Serialization; // serializer
 //using System.Windows.Data; // iconverter
+using MySqlConnector;
 
 
 ///command item sub steps
@@ -35,6 +36,35 @@ namespace MRR_CLG
         {
             MainGame = l_Game;
         }
+
+        public CommandList(Database mydb):this()
+        {
+            // load command list from db
+
+        }
+
+/*
+                public void AddOneCommandToDB(CommandItem thisCommand) //, int commandID, int RunningCommand)
+        {
+            string strSQL = "insert into CommandList " +
+                "(CommandID, Turn, Phase, CommandSequence, CommandSubSequence, " +
+                " CommandTypeID, Parameter, ParameterB, RobotID, StatusID, BTCommand, Description, PositionRow, PositionCol, PositionDir,CommandCatID) " +
+                " values (" + thisCommand.NormalSequence.ToString() + "," + CurrentTurn.ToString() + "," + thisCommand.Phase + "," + thisCommand.NormalSequence + "," + thisCommand.RunningCounter + "," +
+                thisCommand.CommandTypeInt + "," + thisCommand.Value + "," + thisCommand.ValueB + "," + thisCommand.RobotID + "," + (int)thisCommand.Status + ",'" + thisCommand.StringCommand + "','" +
+                thisCommand.Description + "'," + thisCommand.EndPos.Y + "," + thisCommand.EndPos.X + "," + (int)thisCommand.EndPos.Direction + "," + (int)thisCommand.Category
+                + ")";
+
+            DBConn.Command(strSQL);
+
+        }
+*/
+
+  //      public CommandItem AddCommand()
+  //      {
+  //          return AddCommand();
+
+ //       }
+
 
         public CommandItem AddCommand(CommandItem p_InsertBefore, Player p_Player, SquareAction p_Action, tCommandSequence p_Sequence)
         {

@@ -30,39 +30,32 @@ Get all commands where status >= 3 and status <= 4
     public class CommandListProcessor
     {
         private Database DBConn;
-        private RobotConnections RobotList = new RobotConnections();
+        private Players RobotList;
+        private CommandList RobotCommandList;
         
         public CommandListProcessor(Database ldb)
         {
             DBConn = ldb;
 
-            GetRobotList();
+            RRGame tempgame = new RRGame(DBConn);
+
+            RobotList = new Players(tempgame); // load robot list from db
+
         }
 
-            // create list of robots
-        public bool GetRobotList()
+        public void UpdateCommandList()
         {
-            RobotList.Clear();
-            string strSQL = "Select RobotID from Robots;";
-            MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
-            while (reader.Read())
-            {
-                RobotList.Add(new RobotConnection((int)reader[0]));
-            }
-
-            return true;
+            
         }
 
         public bool CheckPendingCommands()
         {
-
-
-            return false;
+            string strSQL = "select count(*) from viewCommandListActive;";
+            return DBConn.GetIntFromDB(strSQL)>0;
         }
 
         public void ProcessList()
         {
-
             while(CheckPendingCommands())  // continue to execute commands while they exist
             {
 
