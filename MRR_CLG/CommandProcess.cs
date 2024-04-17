@@ -32,20 +32,38 @@ Get all commands where status >= 3 and status <= 4
         private Database DBConn;
         private Players RobotList;
         private CommandList RobotCommandList;
+
+        private RRGame lGame;
         
         public CommandListProcessor(Database ldb)
         {
             DBConn = ldb;
 
-            RRGame tempgame = new RRGame(DBConn);
+            lGame = new RRGame(DBConn);
 
-            RobotList = new Players(tempgame); // load robot list from db
+            RobotList = new Players(lGame); // load robot list from db
+
+            RobotCommandList = new CommandList(lGame);
 
         }
 
+        /// <summary>
+        /// get current commands that need processed
+        /// </summary>
         public void UpdateCommandList()
         {
+            RobotCommandList.Clear();
+            string strSQL = "select * from viewCommandListActive;";
             
+            MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
+            while (reader.Read())
+            {
+                RobotCommandList.Add(new Command());
+                //Player newPlayer = new Player(rRGame,reader);
+                //this.Add(newPlayer);
+
+
+            return DBConn.GetIntFromDB(strSQL)>0;
         }
 
         public bool CheckPendingCommands()
