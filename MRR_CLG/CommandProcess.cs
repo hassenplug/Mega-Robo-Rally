@@ -3,6 +3,8 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using System.Net.Cache;
+using Iot.Device.Camera.Settings;
+using System.Collections.ObjectModel; //ObservableCollection
 
 namespace MRR_CLG
 {
@@ -24,18 +26,23 @@ Get all commands where status >= 3 and status <= 4
 
 */
 
+// command id
+// command type
+// robot id
+// command to send
+// status id
+// command cat id
+
 // check for connection to each active robot
 // get list of active commands
 
-    public class CommandListProcessor
+    public class PendingCommands : ObservableCollection<PendingCommand>
     {
         private Database DBConn;
         private Players RobotList;
-        private CommandList RobotCommandList;
-
         private RRGame lGame;
         
-        public CommandListProcessor(Database ldb)
+        public PendingCommands(Database ldb)
         {
             DBConn = ldb;
 
@@ -43,42 +50,50 @@ Get all commands where status >= 3 and status <= 4
 
             RobotList = new Players(lGame); // load robot list from db
 
-            RobotCommandList = new CommandList(lGame);
-
         }
 
         /// <summary>
         /// get current commands that need processed
         /// </summary>
-        public void UpdateCommandList()
+        public PendingCommands UpdateCommandList()
         {
-            RobotCommandList.Clear();
-            string strSQL = "select * from viewCommandListActive;";
+            // call function to mark ready
+            // funcMarkCommandsReady()
+
+            this.Clear();
+
+            // if funcMarkCommandsReady == 0, return 0
+
+            string strSQL = "select CommandID,CommandType,RobotID,BTCommand,StatusID,CommandCatID from viewCommandListActive;";
             
             MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
             while (reader.Read())
             {
-                RobotCommandList.Add(new Command());
-                //Player newPlayer = new Player(rRGame,reader);
-                //this.Add(newPlayer);
-
-
-            return DBConn.GetIntFromDB(strSQL)>0;
-        }
-
-        public bool CheckPendingCommands()
-        {
-            string strSQL = "select count(*) from viewCommandListActive;";
-            return DBConn.GetIntFromDB(strSQL)>0;
-        }
-
-        public void ProcessList()
-        {
-            while(CheckPendingCommands())  // continue to execute commands while they exist
-            {
-
+                this.Add(new PendingCommand( (int)reader.GetValue(0), // command id
+                                            (int)reader.GetValue(1),  // command type
+                                            RobotList.GetPlayer((int)reader.GetValue(2)),  // robot id
+                                            (string)reader.GetValue(3),  // bt command
+                                            (int)reader.GetValue(4),  // status id
+                                            (int)reader.GetValue(5)  // command cat id
+                ));
             }
+
+            return this;
         }
+
+        public bool ProcessCommands()
+        {
+            while (UpdateCommandList().Count > 0)
+            {
+                foreach(PendingCommand onecommand in this)
+                {
+                    // process command here
+                    // update commandstatus
+                }
+            }
+            return false;
+        }
+
 
         // function to wait for reply from robots
         // wait for reply from robots
@@ -86,21 +101,8 @@ Get all commands where status >= 3 and status <= 4
         // wait for input from users
 
         // process all commands
-        public string ProcessCommand()
-        {
-            // find list of commands
-            // send commands to robots
-
-
-            while(true)
-            {
-
-            }
-            //return null;
-        }
-
-        public string ProcessCommands()
-        {
+        //public string ProcessCommands()
+        //{
             // get database state
             // switch & process it
 
@@ -118,10 +120,30 @@ Get all commands where status >= 3 and status <= 4
             //Thread t = new Thread(new ThreadStart(worker.Start));
             //t.Start();
 
-            return null;
+        //    return null;
+        //}
+
+    }
+
+    public class PendingCommand  //: IComparable
+    {
+
+        public PendingCommand(int pcommandid, int pcommandType, Player pplayer, string pbtcommand, int pstatusid, int pcomcat) 
+        {
+            CommandID = pcommandid;
+            CommandType = pcommandType;
+            RobotConnection = pplayer;
+            CommandString = pbtcommand;
+            StatusID = pstatusid;
+            CommandCatID = pcomcat;
         }
 
-
+        public int CommandID {get;set;}
+        public int CommandType {get;set;}
+        public Player RobotConnection {get;set;}
+        public string CommandString {get;set;}
+        public int StatusID {get;set;}
+        public int CommandCatID {get;set;} 
 
     }
 
