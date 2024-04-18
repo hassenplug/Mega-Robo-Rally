@@ -64,7 +64,7 @@ Get all commands where status >= 3 and status <= 4
 
             // if funcMarkCommandsReady == 0, return 0
 
-            string strSQL = "select CommandID,CommandType,RobotID,BTCommand,StatusID,CommandCatID from viewCommandListActive;";
+            string strSQL = "select CommandID,CommandTypeID,RobotID,BTCommand,StatusID,CommandCatID from viewCommandListActive;";
             
             MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
             while (reader.Read())
