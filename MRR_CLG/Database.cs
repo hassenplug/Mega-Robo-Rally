@@ -66,6 +66,7 @@ namespace MRR_CLG
                 //Console.WriteLine(strSQL);
                 MySqlConnector.MySqlCommand update = Conn.CreateCommand();  // Game.DBConn.Exec(strSQL);
                 update.CommandText = strSQL;
+                Console.WriteLine(strSQL);
                 update.ExecuteNonQuery();
                 
                 return true;
