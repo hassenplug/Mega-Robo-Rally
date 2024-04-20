@@ -55,18 +55,23 @@ Get all commands where status >= 3 and status <= 4
         /// <summary>
         /// get current commands that need processed
         /// </summary>
-        public PendingCommands UpdateCommandList()
+        public int UpdateCommandList()
         {
             // call function to mark ready
             // funcMarkCommandsReady()
 
+            Console.WriteLine("UpdateCommandList");
+
             this.Clear();
 
             // if funcMarkCommandsReady == 0, return 0
+            int activeCommands = DBConn.GetIntFromDB("Select funcMarkCommandsReady();");  //procGetReadyCommands`;
+            if (activeCommands == 0) return 0;
 
             string strSQL = "select CommandID,CommandTypeID,RobotID,BTCommand,StatusID,CommandCatID from viewCommandListActive;";
             
             MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
+
             while (reader.Read())
             {
                 this.Add(new PendingCommand( (int)reader.GetValue(0), // command id
@@ -76,19 +81,33 @@ Get all commands where status >= 3 and status <= 4
                                             (int)reader.GetValue(4),  // status id
                                             (int)reader.GetValue(5)  // command cat id
                 ));
+                Console.WriteLine("UpdateCommandList:" + (int)reader.GetValue(0));
             }
 
-            return this;
+            return this.Count;
         }
 
         public bool ProcessCommands()
         {
-            while (UpdateCommandList().Count > 0)
+            Console.WriteLine("Process Commands");
+            if (lGame.GameState != 8) return true; // all commands are processed
+
+            // are there commands that need processing?
+            while(DBConn.GetIntFromDB("select count(*) from viewCommandList where StatusID <6")>0)
             {
-                foreach(PendingCommand onecommand in this)
+                Console.WriteLine("Active Commands");
+                while (UpdateCommandList() > 0)
                 {
-                    // process command here
-                    // update commandstatus
+                    Console.WriteLine("Inside UpdateCommandList");
+                    foreach(PendingCommand onecommand in this)
+                    {
+                        // process command here
+                        // update commandstatus
+//                        `funcProcessCommand` (p_CommandID int, p_NewStatus int)
+                        Console.WriteLine("Process Command(" + onecommand.CommandID + ")["+ onecommand.CommandCatID +"]{" + onecommand.CommandType + "}" + onecommand.CommandString);
+
+                        DBConn.Command("select funcProcessCommand(" + onecommand.CommandID + ",5)");
+                    }
                 }
             }
             return false;
