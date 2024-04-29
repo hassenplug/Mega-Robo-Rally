@@ -89,8 +89,13 @@ namespace MRR_CLG
                     break;
                 case "2":
                     string positionValid = requestSplit[4];
-                    // 
+                    // clear message
                     rDBConn.Command("update Robots set PositionValid=" + positionValid + " where RobotID=" + playerid + ";");
+                    break;
+                case "3":
+                    int markcommand = rDBConn.GetIntFromDB("Select MessageCommandID from Robots where RobotID=" + playerid);
+                    rDBConn.Command("update Robots set MessageCommandID=null where RobotID=" + playerid + ";");
+                    rDBConn.Command("update CommandList set StatusID=6 where CommandID=" + markcommand + ";");
                     break;
 
             }

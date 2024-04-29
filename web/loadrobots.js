@@ -21,7 +21,7 @@ function showcards(pl,robots)  // show cards for this player
     var dealt = rbt.CardsDealt.split(",");
     var played = rbt.CardsPlayed.split(",");
     var executed = rbt.StatusToShow.split(",");
-    var message = rbt.Message;
+    var message = rbt.msg;
 
     //console.log("Robot:" ,CurrentLine, " line: ", pl );
 
@@ -80,7 +80,7 @@ function showcards(pl,robots)  // show cards for this player
 function confirmMessage()
 {
     //CurrentPlayer
-    fetch('updatePlayer/2/' + CurrentPlayer + '/1')
+    fetch('updatePlayer/3/' + CurrentPlayer + '/0')
         .then((response) => response.json())
         .then((robots) => {
             showcards(CurrentLine,robots);

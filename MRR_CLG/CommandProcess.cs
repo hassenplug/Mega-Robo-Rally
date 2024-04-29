@@ -65,8 +65,10 @@ Get all commands where status >= 3 and status <= 4
             this.Clear();
 
             // if funcMarkCommandsReady == 0, return 0
-            int activeCommands = DBConn.GetIntFromDB("Select funcMarkCommandsReady();");  //procGetReadyCommands`;
+            int activeCommands = MarkCommandsReady(); // DBConn.GetIntFromDB("Select funcMarkCommandsReady();");  //procGetReadyCommands`;
+            //Console.WriteLine("functionMarkCommandsReady - any commands");
             if (activeCommands == 0) return 0;
+            Console.WriteLine("functionMarkCommandsReady:" + activeCommands);
 
             string strSQL = "select CommandID,CommandTypeID,RobotID,BTCommand,StatusID,CommandCatID from viewCommandListActive;";
             
@@ -84,33 +86,95 @@ Get all commands where status >= 3 and status <= 4
                 Console.WriteLine("UpdateCommandList:" + (int)reader.GetValue(0));
             }
 
+            reader.Close();
+
             return this.Count;
         }
 
         public bool ProcessCommands()
         {
-            Console.WriteLine("Process Commands");
+            Console.WriteLine("Process Commands State: " + lGame.GameState);
             if (lGame.GameState != 8) return true; // all commands are processed
+            bool stillRunning = true;
 
             // are there commands that need processing?
-            while(DBConn.GetIntFromDB("select count(*) from viewCommandList where StatusID <6")>0)
-            {
-                Console.WriteLine("Active Commands");
-                while (UpdateCommandList() > 0)
+            //while(DBConn.GetIntFromDB("select count(*) from viewCommandList where StatusID <6")>0)
+            //{
+                while (UpdateCommandList() > 0 && stillRunning)
                 {
-                    Console.WriteLine("Inside UpdateCommandList");
+                    Console.WriteLine("Active Commands:" + this.Count());
+                    stillRunning = false;
                     foreach(PendingCommand onecommand in this)
                     {
-                        // process command here
-                        // update commandstatus
-//                        `funcProcessCommand` (p_CommandID int, p_NewStatus int)
-                        Console.WriteLine("Process Command(" + onecommand.CommandID + ")["+ onecommand.CommandCatID +"]{" + onecommand.CommandType + "}" + onecommand.CommandString);
-
-                        DBConn.Command("select funcProcessCommand(" + onecommand.CommandID + ",5)");
+                        stillRunning = stillRunning || ExecuteCommand(onecommand);
                     }
                 }
-            }
+            //}
+            Console.WriteLine("Process Commands:Done ");
             return false;
+        }
+
+/*
+1	Robot wReply	1	0	0
+2	Robot No Reply	1	0	0
+3	DB	0	1	0
+4	PI	0	0	1
+5	Node 	0	0	0
+6	User Input	0	0	0
+7	Connection	1	0	0
+				
+*/
+        public bool ExecuteCommand(PendingCommand onecommand)
+        {
+            Console.WriteLine("Process Command(" + onecommand.CommandID + ")["+ onecommand.CommandCatID +"]{" + onecommand.CommandType + "}" + onecommand.CommandString);
+            switch(onecommand.CommandCatID)
+            {
+                case 1:
+                    if (onecommand.StatusID == 2)
+                    {
+                        DBConn.Command("select funcProcessCommand(" + onecommand.CommandID + ",4)");
+                        // send command to robot here..
+                        return true;
+                    }
+                    return false;
+                case 2:
+                case 3:
+                    DBConn.Command("select funcProcessCommand(" + onecommand.CommandID + ",5)");
+                    return true;
+                case 6:
+                    if (onecommand.StatusID < 4)
+                    {
+                        DBConn.Command("update Robots set MessageCommandID = " + onecommand.CommandID + " where RobotID = " + onecommand.RobotConnection.ID + "; ");
+                        DBConn.Command("update CommandList set StatusID=4 where CommandID = " + onecommand.CommandID + "; ");
+                        return true;
+                    }
+                    return false;
+
+                default:
+        
+                    DBConn.Command("select funcProcessCommand(" + onecommand.CommandID + ",5)");
+                    break;
+            }
+            // process command here
+            // update commandstatus
+
+            return false;
+        }
+
+        public int MarkCommandsReady()
+        {
+            int result;
+
+            // check to see if any others are still incomplete.  If so, exit
+            result = DBConn.GetIntFromDB("Select count(*) from CommandList where  StatusID>=2 and StatusID <=4;");
+            if (result > 0) return result; 
+            
+            var resultset = DBConn.GetIntList("select count(CommandID), min(CommandSequence) from CommandList where StatusID=1;");
+            
+            if (resultset[0] == 0) return 0; //# no commands waiting
+
+            return DBConn.Command("Update CommandList set StatusID=2 where CommandSequence=" + resultset[1] + ";");
+            
         }
 
 
@@ -164,6 +228,26 @@ Get all commands where status >= 3 and status <= 4
         public int StatusID {get;set;}
         public int CommandCatID {get;set;} 
 
+        public bool ExecuteCommand()
+        {
+            return false;
+        }
+
     }
 
 }
+
+/*
+
+		if (cRobotID = 0) then
+			update CurrentGameData set iValue = 7, sValue = cDescription where iKey = 10;  # go to wait for input state and set button text
+		else
+			if (cStatus<4) then
+	#			update Robots set MessageCommandID = cParameter, MessageString = cDescription where RobotID = cRobotID;  # go to wait for input state and set button text
+				update Robots set MessageCommandID = p_CommandID where RobotID = cRobotID;  
+				set p_NewStatus = 4; # In progress; waiting for input
+			#else 
+				#update Robots set MessageCommandID = null where RobotID = cRobotID;  
+			end if;
+        end if;
+*/

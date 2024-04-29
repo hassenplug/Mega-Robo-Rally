@@ -48,17 +48,25 @@ namespace MRR_CLG
         {
             if (Conn.State == System.Data.ConnectionState.Open)
             {
-                MySqlCommand cmd = new MySqlCommand();
-                cmd.CommandText = strSQL;
-                cmd.Connection = Conn;
-                cmd.CommandType = System.Data.CommandType.Text;
-                return cmd.ExecuteReader();
+                try
+                {
+                
+                    MySqlCommand cmd = new MySqlCommand();
+                    cmd.CommandText = strSQL;
+                    cmd.Connection = Conn;
+                    cmd.CommandType = System.Data.CommandType.Text;
+                    return cmd.ExecuteReader();
+                }
+                catch(Exception e)
+                {
+
+                }
             }
 
             return null;
         }
 
-        public bool Command(string strSQL)
+        public int Command(string strSQL)
         {
             if (Conn.State == System.Data.ConnectionState.Open)
             {
@@ -67,11 +75,10 @@ namespace MRR_CLG
                 MySqlConnector.MySqlCommand update = Conn.CreateCommand();  // Game.DBConn.Exec(strSQL);
                 update.CommandText = strSQL;
                 Console.WriteLine(strSQL);
-                update.ExecuteNonQuery();
+                return update.ExecuteNonQuery();
                 
-                return true;
             }
-            return false;
+            return 0;
         }
 
         public int GetIntFromDB(string strSQL)
@@ -97,6 +104,28 @@ namespace MRR_CLG
             }
             returnset.Close();
             return returnval;
+        }
+
+        public int[] GetIntList(string strSQL)
+        {
+            var returnset = this.Exec(strSQL);
+            List<int> returnvalset = new List<int>();
+
+            if (returnset.Read())
+            {
+                for(int f=0;f<returnset.FieldCount;f++)
+                {
+                    //Console.WriteLine(returnset[0]);
+                    var returnval = 0;
+                    if (returnset[f] != System.DBNull.Value)
+                    {
+                        returnval = (int)(long)Convert.ToInt64(returnset[f]) ;
+                    }
+                    returnvalset.Add(returnval);
+                }
+            }
+            returnset.Close();
+            return returnvalset.ToArray();
         }
 
 
