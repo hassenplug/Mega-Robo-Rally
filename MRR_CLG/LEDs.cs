@@ -21,16 +21,14 @@ namespace MRR_CLG
     public class LEDs
     {
         private const int LEDcount = 144;
-        //private Database DBConn; 
         private Ws2812b device;
 
         private SpiConnectionSettings settings;
         private SpiDevice spi;
         private RawPixelContainer image;
 
-        public LEDs(Database db)
+        public LEDs()
         {
-            //DBConn = db;
             
             settings = new SpiConnectionSettings(0, 0) {
                 ClockFrequency = 2_400_000,

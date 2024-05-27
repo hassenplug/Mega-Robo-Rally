@@ -13,15 +13,8 @@ namespace MRR_CLG
 
         public MySqlConnection Connect()
         {
-            //string myConnectionString = "server=robopi;uid=root;pwd=rallypass;database=rally;";
-            //string myConnectionString = "server=localhost;uid=root;pwd=rallypass;database=rally;";
-
-            //string myConnectionString = "server=192.168.1.135;uid=srr;pwd=rallypass;database=rally;";
-//            string myConnectionString = "server=robopi;uid=srr;pwd=rallypass;database=rally;";
             string myConnectionString = "server=mrobopi3;uid=mrr;pwd=rallypass;database=rally;";
-//            string myConnectionString = "server=mrobopi1;uid=srr;pwd=rallypass;database=rally;";
-
-            //string myConnectionString = "server=localhost;uid=srr;pwd=rallypass;database=rally;";
+            
             try
             {
                 Conn = new MySqlConnection();
@@ -84,7 +77,7 @@ namespace MRR_CLG
 
         public int GetIntFromDB(string strSQL)
         {
-            var returnset = this.Exec(strSQL);
+            var returnset = Exec(strSQL);
             var returnval = 0;
             if (returnset.Read())
             {
@@ -109,7 +102,7 @@ namespace MRR_CLG
 
         public int[] GetIntList(string strSQL)
         {
-            var returnset = this.Exec(strSQL);
+            var returnset = Exec(strSQL);
             List<int> returnvalset = new List<int>();
 
             if (returnset.Read())
@@ -135,7 +128,7 @@ namespace MRR_CLG
             string output = "";
             string comma = "";
 
-            MySqlConnector.MySqlDataReader reader = this.Exec(strSQL);
+            MySqlConnector.MySqlDataReader reader = Exec(strSQL);
             while (reader.Read())
             {
                 string commain = "";
@@ -162,7 +155,7 @@ namespace MRR_CLG
             string output = "";
             string fields = "";
 
-            MySqlConnector.MySqlDataReader reader = this.Exec(strSQL);
+            MySqlConnector.MySqlDataReader reader = Exec(strSQL);
             while (reader.Read())
             {
                 fields = "";
@@ -182,6 +175,45 @@ namespace MRR_CLG
 
             output = "<table width='100%'><tr>" + fields + "</tr>" + output + "</table>";
             reader.Close();
+
+            //Console.WriteLine("output:" + output);
+
+            return output;
+        }
+
+        public string GetTableNames(string usetable)
+        {
+            string strSQL = "select TABLE_NAME  from information_schema.TABLES t where TABLE_SCHEMA ='rally' order by TABLE_TYPE , TABLE_NAME  ;";
+            string output = "";
+
+            MySqlDataReader reader = Exec(strSQL);
+            while (reader.Read())
+            {
+                output += "<option value='" +  reader[0] + "'";
+                if ((string)reader[0] == usetable) output += " selected ";
+                output += ">" +  reader[0] + "</option>";
+            }
+
+            output = "<select id='tables' onchange='changeToTable();'>" + output + "</select>";
+            reader.Close();
+            return output;
+        }
+
+        public string GetEditor(string readdata)
+        {
+
+            var sout = readdata.Split("/");
+            var newQuery =  sout[sout.Length-1] ;
+//            return rDBConn.GetHTMLfromQuery(newQuery);
+
+            string output = "<html><head>";
+            output += "<script src='/jscode.js' type='text/javascript' charset='utf-8'></script>";
+            output += "</head><body>";
+//            output += "<h1>Database Editor</h1>";
+            output +=  GetTableNames(newQuery);
+            newQuery = "Select * from " + newQuery;
+            output += GetHTMLfromQuery(newQuery);
+            output += "</body></html>";
 
             //Console.WriteLine("output:" + output);
 

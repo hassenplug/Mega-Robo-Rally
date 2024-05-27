@@ -47,57 +47,10 @@ namespace MRR_CLG
             AllPlayers = new Players();
 
             g_BoardElements = new BoardElementCollection(0, 0);
-
         }
 
-        public int UpdateGameState()
-        {
-            if (DBConn.Conn.State == System.Data.ConnectionState.Open)
-            {
-                string strSQL = "Select iKey, sKey, iValue, sValue from CurrentGameData;";
-                MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
-                while (reader.Read())
-                {
-                    //Console.WriteLine("key:" + reader[1]);
-                    switch ((int)reader[0])
-                    {
-                        case 10: GameState = (int)reader[2];break;
-                        case 2: CurrentTurn = (int)reader[2];break;
-                        case 3: CurrentPhase = (int)reader[2];break;
-                        case 16: PhaseCount = (int)reader[2];break;
-                        //case 24: AutoExecute = (int)reader[2];break;
-                        case 27: RulesVersion = (int)reader[2];break;
-                        case 20: BoardID = (int)reader[2]; 
-                            if (reader[3] != System.DBNull.Value) BoardFileName =  (string)reader[3];
-                            break;
+        public Communication rCommunication;
 
-                        case  6: LaserDamage = (int)reader[2];break;
-                        case  1: GameType = (GameTypes)reader[2];break;
-                        case 22: OptionsOnStartup = (int)reader[2];break;
-                    
-                    }
-                    // GameState = (int)reader[1];
-                    // CurrentGameID = (int)reader[0];
-                    // CurrentTurn = (int)reader[2];
-                    // CurrentPhase = (int)reader[3];
-                    // PhaseCount = (int)reader[4];
-                    // AutoExecute = (int)reader[5];
-                }
-                reader.Close();
-            }
-            return GameState;
-        }
-
-        public bool SendGameMessage(int NewState, string NewMessage)
-        {
-            if (DBConn.Conn.State == System.Data.ConnectionState.Open)
-            {
-                DBConn.Command("Update CurrentGameData set iValue=" + NewState + " where iKey=10;");
-                DBConn.Command("Update CurrentGameData set sValue='" + NewMessage + "' where iKey=16;");
-            }
-            return true;
-
-        }
 
         public string BoardFileName { get; set; }
 
@@ -163,8 +116,65 @@ namespace MRR_CLG
         public int LaserDamage  { get; set; } = 1;
 
         public int TotalFlags  { get; set; } = 4;
+        
+        public PendingCommands rPendingCommands;
+
+
 
         #endregion Game Parameters & Configuration
+
+        #region Game Config
+        public int UpdateGameState()
+        {
+            if (DBConn.Conn.State == System.Data.ConnectionState.Open)
+            {
+                string strSQL = "Select iKey, sKey, iValue, sValue from CurrentGameData;";
+                MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
+                while (reader.Read())
+                {
+                    //Console.WriteLine("key:" + reader[1]);
+                    switch ((int)reader[0])
+                    {
+                        case 10: GameState = (int)reader[2];break;
+                        case 2: CurrentTurn = (int)reader[2];break;
+                        case 3: CurrentPhase = (int)reader[2];break;
+                        case 16: PhaseCount = (int)reader[2];break;
+                        //case 24: AutoExecute = (int)reader[2];break;
+                        case 27: RulesVersion = (int)reader[2];break;
+                        case 20: BoardID = (int)reader[2]; 
+                            if (reader[3] != System.DBNull.Value) BoardFileName =  (string)reader[3];
+                            break;
+
+                        case  6: LaserDamage = (int)reader[2];break;
+                        case  1: GameType = (GameTypes)reader[2];break;
+                        case 22: OptionsOnStartup = (int)reader[2];break;
+                    
+                    }
+                    // GameState = (int)reader[1];
+                    // CurrentGameID = (int)reader[0];
+                    // CurrentTurn = (int)reader[2];
+                    // CurrentPhase = (int)reader[3];
+                    // PhaseCount = (int)reader[4];
+                    // AutoExecute = (int)reader[5];
+                }
+                reader.Close();
+            }
+            return GameState;
+        }
+
+        public bool SendGameMessage(int NewState, string NewMessage)
+        {
+            if (DBConn.Conn.State == System.Data.ConnectionState.Open)
+            {
+                DBConn.Command("Update CurrentGameData set iValue=" + NewState + " where iKey=10;");
+                DBConn.Command("Update CurrentGameData set sValue='" + NewMessage + "' where iKey=16;");
+            }
+            return true;
+
+        }
+
+        #endregion
+
 
         #region Process Move
 
@@ -523,6 +533,14 @@ namespace MRR_CLG
         #endregion Process Move
 
         #region Game Commands
+
+        public void StartServers()
+        {
+            rPendingCommands = new PendingCommands(this);
+            rCommunication = new Communication(this);
+            rCommunication.StartServer();
+
+        }
 
         public void SetupGame()
         {

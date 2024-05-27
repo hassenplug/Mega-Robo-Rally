@@ -39,16 +39,20 @@ Get all commands where status >= 3 and status <= 4
     public class PendingCommands : ObservableCollection<PendingCommand>
     {
         private Database DBConn;
+        private RRGame rRGame;
         private Players RobotList;
         private RRGame lGame;
         
-        public PendingCommands(Database ldb)
+        public PendingCommands(RRGame lRGame)
         {
-            DBConn = ldb;
+            rRGame = lRGame;
 
-            lGame = new RRGame(DBConn);
+            DBConn = rRGame.DBConn;
+            //DBConn = ldb;
 
-            RobotList = new Players(lGame); // load robot list from db
+            //lGame = new RRGame(DBConn);
+
+            RobotList = new Players(rRGame); // load robot list from db
 
         }
 
