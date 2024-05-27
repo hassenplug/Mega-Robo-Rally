@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Client</title>
+</head>
+<body>
+    <h2>WebSocket Client</h2>
+    <div>
+        <button id="connectBtn">Connect</button>
+        <button id="sendBtn" disabled>Send Message</button>
+        <button id="closeBtn" disabled>Close Connection</button>
+        <input type="text" id="messageInput" placeholder="Enter message" />
+        <div id="messages"></div>
+    </div>
+    <script>
+        let socket;
+
+        document.getElementById('connectBtn').addEventListener('click', () => {
+            socket = new WebSocket('ws://' + window.location.host + '/ws');
+
+            socket.onopen = function (event) {
+                document.getElementById('messages').innerHTML += '<div>Connection opened</div>';
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('closeBtn').disabled = false;
+            };
+
+            socket.onmessage = function (event) {
+                document.getElementById('messages').innerHTML += '<div>Message from server: ' + event.data + '</div>';
+            };
+
+            socket.onclose = function (event) {
+                document.getElementById('messages').innerHTML += '<div>Connection closed</div>';
+                document.getElementById('sendBtn').disabled = true;
+                document.getElementById('closeBtn').disabled = true;
+            };
+
+            socket.onerror = function (event) {
+                document.getElementById('messages').innerHTML += '<div>Error: ' + event.data + '</div>';
+            };
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', () => {
+            const message = document.getElementById('messageInput').value;
+            socket.send(message);
+            document.getElementById('messages').innerHTML += '<div>Sent: ' + message + '</div>';
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            socket.close();
+        });
+    </script>
+</body>
+</html>

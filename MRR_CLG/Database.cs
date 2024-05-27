@@ -59,6 +59,7 @@ namespace MRR_CLG
                 }
                 catch(Exception e)
                 {
+                    Console.WriteLine("DBError:{0}" , e);
 
                 }
             }

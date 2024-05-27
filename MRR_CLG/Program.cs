@@ -11,10 +11,12 @@ namespace MRR_CLG
     class Program
     {
 
-        private static TcpListener myListener;
-        private static int port = 5050;
-//        private static IPAddress localAddr = IPAddress.Parse("127.0.0.1");
-        private static IPAddress localAddr = IPAddress.Parse("0.0.0.0");
+        private static TcpListener myTCPListener;
+        private static IPAddress TCPAddr = IPAddress.Parse("0.0.0.0");
+        private static int TCPport = 5050;
+        private static UdpClient udpServer;
+        private static int UDPport = 5010;
+
         private static string WebServerPath = "../web";
         private static string serverEtag = Guid.NewGuid().ToString("N");
 
@@ -36,11 +38,16 @@ namespace MRR_CLG
             try
             {
 
-                myListener = new TcpListener(localAddr, port);
-                myListener.Start();
-                Console.WriteLine($"Web Server Running on {localAddr.ToString()} on port {port}... Press ^C to Stop...");
-                Thread th = new Thread(new ThreadStart(StartListen));
+                myTCPListener = new TcpListener(TCPAddr, TCPport);
+                myTCPListener.Start();
+                Console.WriteLine($"Web Server Running on {TCPAddr.ToString()} on port {TCPport}... Press ^C to Stop...");
+                Thread th = new Thread(new ThreadStart(Start_TCP_Listen));
                 th.Start();
+
+                udpServer = new UdpClient(UDPport);
+                Console.WriteLine($"UDP server listening on port {UDPport}");
+                Thread th2 = new Thread(new ThreadStart(Start_UDP_Server));
+                th2.Start();
             }
             catch (System.Exception)
             {
@@ -174,12 +181,42 @@ namespace MRR_CLG
 
         }
 
-        private static void StartListen()
+        private static async void Send_UDP_Message(IPEndPoint destination, byte message)
+        {
+            // receivedResult.RemoteEndPoint
+            // send message
+            //UdpReceiveResult receivedResult ;
+            //IPEndPoint destination; // = new IPEndPoint();
+            string responseMessage = "Message received";
+            byte[] responseBytes = Encoding.UTF8.GetBytes(responseMessage);
+            //responseBytes[3] = (byte)counter;
+            responseBytes[2] = message;
+            await udpServer.SendAsync(responseBytes, responseBytes.Length, destination);
+            Console.WriteLine($"Sent response to {destination}");
+        }
+
+        private static async void Start_UDP_Server()
+        {
+            var counter = 0;
+
+            while (true)
+            {
+                //  receive message
+                var receivedResult = await udpServer.ReceiveAsync();
+                string receivedMessage = Encoding.UTF8.GetString(receivedResult.Buffer);
+                counter+=1;
+                Console.WriteLine($"Received: {receivedMessage} from {receivedResult.RemoteEndPoint} count {counter}  ");
+
+                Send_UDP_Message(receivedResult.RemoteEndPoint,(byte)counter);
+            }
+        }
+
+        private static void Start_TCP_Listen()
         {
             while (true)
             {
              
-                TcpClient client = myListener.AcceptTcpClient();
+                TcpClient client = myTCPListener.AcceptTcpClient();
                 ThreadPool.QueueUserWorkItem(state => HandleConnection(client));
 
             }
@@ -212,6 +249,10 @@ namespace MRR_CLG
             else if (requestedPath.Contains("/startgame"))
             {
                 return  Encoding.ASCII.GetBytes(StartGame(requestedPath));
+            }
+            else if (requestedPath.Contains("/editboard"))
+            {
+                return  Encoding.ASCII.GetBytes(EditBoard(requestedPath));
             }
             else if (requestedPath.Contains("/processcommands"))
             {
@@ -324,6 +365,27 @@ namespace MRR_CLG
             var startstate = rDBConn.GetIntFromDB("select funcGetNextGameState(); ");
             //Console.WriteLine("next:" + newstate.ToString());
             return "New Game:" + startstate.ToString();
+        }
+
+        public static string EditBoard(string request)
+        {
+            string[] sout = request.Split('/');
+            if (sout[sout.Length-1] == "editboard")
+            {
+                // combo box board selector
+            }
+            else
+            {
+                // table with board
+                // for row
+                // for column
+                int boardid;
+                int.TryParse( sout[sout.Length-1],out boardid);
+                rRGame.BoardLoadFromDB(boardid);
+                //rRGame.
+                //foreach()
+            }
+            return "";
         }
 
 

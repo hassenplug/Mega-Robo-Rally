@@ -56,7 +56,7 @@ namespace MRR_CLG
             }
 
             //string strJson = JsonSerializer.Serialize<Ws2812b>(device);
-            //Console.WriteLine(strJson);            
+            Console.WriteLine("LED Animate:{0}", animate);            
 
             switch(animate)
             {
@@ -78,12 +78,12 @@ namespace MRR_CLG
                     for(int i=0; i<LEDcount; i++)
                     {
                         image.SetPixel(i, 0, Color.Black);
-                        Console.Write(i);
-                        Console.Write("-");
+                        //Console.Write(i);
+                        //Console.Write("-");
                         device.Update();
                         System.Threading.Thread.Sleep(10);
                     }
-                    Console.WriteLine("end");
+                    //Console.WriteLine("end");
                     break;
                 case 2:
                     for(int i=0; i<LEDcount+10; i++)
@@ -97,12 +97,12 @@ namespace MRR_CLG
                             image.SetPixel(i-10, 0, Color.Black);
                         }
 
-                        Console.Write(i);
-                        Console.Write("-");
+                        //Console.Write(i);
+                        //Console.Write("-");
                         device.Update();
                         System.Threading.Thread.Sleep(1);
                     }
-                    Console.WriteLine("end");
+                    //Console.WriteLine("end");
                     break;
                 case 3:
                     device.Update();
