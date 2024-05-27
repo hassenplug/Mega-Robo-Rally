@@ -44,25 +44,12 @@ namespace MRR_CLG
 
         public string BoardName { get; set; }
 
-        private int _optionsOnStartup = -1;
-        public int OptionsOnStartup
-        {
-            get
-            {
-                return _optionsOnStartup;
-            }
-            set
-            {
-                _optionsOnStartup = value;
-            }
-        }
-
+        public int OptionsOnStartup { get; set; } = -1;
 
         private int _laserDamage = 1;
         public int LaserDamage { get { return _laserDamage; } set { _laserDamage = value; OnPropertyChanged("LaserDamage"); } }
 
-        private int _lives = 3;
-        public int Lives { get { return _lives; } set { _lives = value; } }
+        public int Lives { get; set; } = 3; // { get { return _lives; } set { _lives = value; } }
 
         public ObservableCollection<BoardElement> BoardElements { get; set; }
 

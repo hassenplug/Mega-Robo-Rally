@@ -100,6 +100,7 @@ namespace MRR_CLG
         }
 
         public string BoardFileName { get; set; }
+
         public int BoardID { get; set; }
 
         public int GameState { get; set; }
@@ -132,43 +133,11 @@ namespace MRR_CLG
         [XmlIgnore]
         public BoardElementCollection g_BoardElements { get; set; } // = new BoardElementCollection(0, 0);
 
-        private int l_currentphase = 0;
-        private int _laserDamage = 1;
-        private int _optionsOnStartup = -1;
-        //[XmlIgnore]
-        public int CurrentPhase
-        {
-            get
-            {
-                return l_currentphase;
+        public int CurrentPhase  { get; set; } = 0;
+        
+        public int CurrentTurn  { get; set; } = 0;
 
-            }
-            set
-            {
-                l_currentphase = value;
-            }
-        }
-
-        private int l_currentturn = 0;
-        //[XmlIgnore]
-        public int CurrentTurn
-        {
-            get
-            {
-                return l_currentturn;
-
-            }
-            set
-            {
-                l_currentturn = value;
-            }
-        }
-
-        public GameTypes GameType
-        {
-            get;set;
-
-        }
+        public GameTypes GameType { get;set; }
 
         public bool IsOptionsEnabled
         {
@@ -189,45 +158,11 @@ namespace MRR_CLG
             }
         }
 
-        public int OptionsOnStartup
-        {
-            get
-            {
-                return _optionsOnStartup; // g_BoardElements.OptionsOnStartup;
-            }
-            set
-            {
-                _optionsOnStartup = value;
-                //g_BoardElements.OptionsOnStartup = value;
-            }
-        }
+        public int OptionsOnStartup  { get; set; } = -1;
 
-        public int LaserDamage
-        {
-            get
-            {
-                //return g_BoardElements.LaserDamage;
-                return _laserDamage;
-            }
-            set
-            {
-                //g_BoardElements.LaserDamage = value;
-                _laserDamage = value;
-            }
-        }
+        public int LaserDamage  { get; set; } = 1;
 
-        private int _totalFlags = 4;
-        public int TotalFlags
-        {
-            get
-            {
-                return _totalFlags;
-            }
-            set
-            {
-                _totalFlags = value;
-            }
-        }
+        public int TotalFlags  { get; set; } = 4;
 
         #endregion Game Parameters & Configuration
 
@@ -2037,17 +1972,6 @@ namespace MRR_CLG
                 }
 
             }
-
-            /*
-            if ((p_PhaseNumber == 1) && ((CurrentTurn < KotHTurnCount) || (g_BoardElements.BoardType != GameTypes.KingOfTheHill)))
-            //if ((p_PhaseNumber == 1) && (((GameType == GameTypes.KingOfTheHill) && (CurrentTurn < 3)) || (GameType == GameTypes.Standard)))
-            //if ((p_PhaseNumber == 1) && ((GameType == GameTypes.KingOfTheHill) && (CurrentTurn < 3)) || (GameType == GameTypes.Standard))
-            //if (p_PhaseNumber == 1) // && (GameType == GameTypes.KingOfTheHill) && (CurrentTurn < 3))
-            {
-                // do not add deal command, because of phones
-                //ListOfCommands.AddCommand(new Player(9),SquareAction.DealCards);
-            }
-             * */
 
         }
 
