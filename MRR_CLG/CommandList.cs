@@ -31,11 +31,6 @@ namespace MRR_CLG
             Phase = 0;
         }
 
-        public CommandList(RRGame l_Game)
-            : this()
-        {
-            MainGame = l_Game;
-        }
 
         public CommandList(Database mydb):this()
         {
@@ -70,7 +65,7 @@ namespace MRR_CLG
         {
             // insert turning if this move is a turn... (turn "insert before" move)  (or do it at end of phase generation)
 
-            CommandItem newCommand = new CommandItem(p_InsertBefore.Phase, p_InsertBefore.PhaseStep, p_Player, p_InsertBefore.Value, p_InsertBefore.ValueB, p_InsertBefore.CommandDirection, p_Action, MainGame);
+            CommandItem newCommand = new CommandItem(p_InsertBefore.Phase, p_InsertBefore.PhaseStep, p_Player, p_InsertBefore.Value, p_InsertBefore.ValueB, p_InsertBefore.CommandDirection, p_Action);
 
             int location = this.IndexOf(p_InsertBefore);
             if (p_Sequence == tCommandSequence.After) location++;
@@ -118,7 +113,7 @@ namespace MRR_CLG
         /// <returns></returns>
         public CommandItem AddCommand(Player p_Player, int p_Value, int p_ValueB, Direction p_Direction, SquareAction p_Action)
         {
-            CommandItem newCommand = new CommandItem(Phase, PhaseStep, p_Player, p_Value, p_ValueB, p_Direction, p_Action, MainGame);
+            CommandItem newCommand = new CommandItem(Phase, PhaseStep, p_Player, p_Value, p_ValueB, p_Direction, p_Action);
             this.Add(newCommand);
             //newCommand.RunningCounter = this.Count();
             //if (p_Player.ID ==
@@ -133,14 +128,14 @@ namespace MRR_CLG
         /// <returns></returns>
         public CommandItem AddCommand(int p_Value, int p_ValueB)
         {
-            CommandItem newCommand = new CommandItem(Phase, PhaseStep, null, p_Value, p_ValueB, Direction.None, SquareAction.SetCurrentGameData, MainGame);
+            CommandItem newCommand = new CommandItem(Phase, PhaseStep, null, p_Value, p_ValueB, Direction.None, SquareAction.SetCurrentGameData);
             this.Add(newCommand);
             return newCommand;
         }
 
         public CommandItem AddCommand(string p_buttonText,Player p_Robot = null)
         {
-            CommandItem newCommand = new CommandItem(Phase, PhaseStep, p_Robot, 0, 0, Direction.None, SquareAction.SetButtonText, MainGame);
+            CommandItem newCommand = new CommandItem(Phase, PhaseStep, p_Robot, 0, 0, Direction.None, SquareAction.SetButtonText);
             newCommand.text = p_buttonText;
             this.Add(newCommand);
             return newCommand;
@@ -173,9 +168,6 @@ namespace MRR_CLG
             }
         }
 
-        [XmlIgnore]
-        public RRGame MainGame { get; set; }
-
     }
     #endregion
 
@@ -185,7 +177,7 @@ namespace MRR_CLG
     {
 
         public CommandItem() // this is required to seralize the class
-        :this(0,0,null,0,0,Direction.None,SquareAction.None, null)
+        :this(0,0,null,0,0,Direction.None,SquareAction.None)
         {
         }
 
@@ -205,11 +197,10 @@ namespace MRR_CLG
         /// <param name="p_Value"></param>
         /// <param name="p_Direction"></param>
         /// <param name="p_Type"></param>
-        public CommandItem(int p_Phase, int p_PhaseStep, Player p_Robot, int p_Value, int p_ValueB, Direction p_Direction, SquareAction p_Type, RRGame p_mainGame)
+        public CommandItem(int p_Phase, int p_PhaseStep, Player p_Robot, int p_Value, int p_ValueB, Direction p_Direction, SquareAction p_Type) //, RRGame p_mainGame)
         {
             Phase = p_Phase;
             PhaseStep = p_PhaseStep;
-            MainGame = p_mainGame;
 
             CommandType = p_Type;
             Value = p_Value;
@@ -273,24 +264,23 @@ namespace MRR_CLG
         public string text { get; set; }
         public CommandStatus Status { get; set; }
 
-        [XmlIgnore]
-        public RRGame MainGame { get; set; }
-
         private string GetOptionName()
         {
-            if (MainGame.OptionCardNames.ContainsKey(Value))
-            {
-                return MainGame.OptionCardNames[Value].Replace("[quantity]", ValueB.ToString());
-            }
-            else
-            {
-                return "invalid option:[" + Value + "]";
-            }
+            // if (MainGame.OptionCardNames.ContainsKey(Value))
+            // {
+            //     return MainGame.OptionCardNames[Value].Replace("[quantity]", ValueB.ToString());
+            // }
+            // else
+            // {
+            //     return "invalid option:[" + Value + "]";
+            // }
+            return "";
         }
         
         private string GetRobotName(int p_RobotID)
         {
-            return MainGame.WorkingPlayers.GetPlayer(p_RobotID).Name;
+            return "";
+            // return MainGame.AllPlayers.GetPlayer(p_RobotID).Name;
         }
 
         public CommandCategories Category { get { return GetCommandDetails.Category; }}
@@ -362,7 +352,8 @@ namespace MRR_CLG
                     //case SquareAction.Card:return new SquareActionDetails(CommandCategories.DB, "played card: ") ; //+ MainGame.GameCards.FirstOrDefault(gc=>gc.ID == Value).Text + "");
                     case SquareAction.Card:
                         if (Value==99) return new SquareActionDetails(CommandCategories.DB, "played card: SPAM"); // + MainGame.GameCards.FirstOrDefault(gc=>(gc.ID == Value) && (gc.Owner==RobotID)).Text + "");
-                        return new SquareActionDetails(CommandCategories.DB, "played card: " + MainGame.GameCards.FirstOrDefault(gc=>(gc.ID == Value) && (gc.Owner==RobotID)).Text + "");
+                        return new SquareActionDetails(CommandCategories.DB, "played card: " + "");
+                        // return new SquareActionDetails(CommandCategories.DB, "played card: " + MainGame.GameCards.FirstOrDefault(gc=>(gc.ID == Value) && (gc.Owner==RobotID)).Text + "");
                     case SquareAction.Randomizer:return new SquareActionDetails(CommandCategories.DB, "gets random card");
                     case SquareAction.BeginBoardEffects: return new SquareActionDetails(CommandCategories.DB, "begin board effects");
                     case SquareAction.SetPlayerStatus: return new SquareActionDetails(CommandCategories.DB, "Status: " + Value);

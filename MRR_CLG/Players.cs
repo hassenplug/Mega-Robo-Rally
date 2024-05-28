@@ -85,16 +85,16 @@ namespace MRR_CLG
 
         }
 
-        public Players(RRGame rRGame, int RobotID = 0) // 0 = all
+        public Players(Database DBConn, int RobotID = 0) // 0 = all
         {
             string strSQL = "Select RobotID,CurrentFlag,Lives,Damage,ShutDown,Status,CurrentPosRow,CurrentPosCol,CurrentPosDir,Priority,Energy,PlayerSeat from Robots where Status <> 10 ";
             if (RobotID > 0) strSQL += " and RobotID=" + RobotID ;
             strSQL += ";";
 
-            MySqlConnector.MySqlDataReader reader = rRGame.DBConn.Exec(strSQL);
+            MySqlConnector.MySqlDataReader reader = DBConn.Exec(strSQL);
             while (reader.Read())
             {
-                Player newPlayer = new Player(rRGame,reader);
+                Player newPlayer = new Player(DBConn,reader);
                 this.Add(newPlayer);
 //                Console.WriteLine(newPlayer.Name + " " + newPlayer.DamagePoints);
             }
@@ -138,7 +138,7 @@ namespace MRR_CLG
 
         // main constructor
 
-        public Player SetPlayer(RRGame mainGame,
+        public Player SetPlayer(Database ldb,
             int p_ID, 
             string p_Name, 
             RobotLocation p_CurrentPos, 
@@ -152,7 +152,8 @@ namespace MRR_CLG
             bool p_ComputerPlayer,
             int p_DamagePoints)
         {
-            MainGame = mainGame;
+            //MainGame = mainGame;
+            DBConn = ldb;
             ID = p_ID;
             ShutDown = p_ShutDown;
 
@@ -160,13 +161,13 @@ namespace MRR_CLG
             NextPos = new RobotLocation(p_NextPos);
             ArchivePos = new RobotLocation(p_Archive);
             //NextFlag = new RobotLocation(p_CurrentPos);
-            if (mainGame is null)
+            if (DBConn is null)
             {
                 NextFlag = new RobotLocation(p_CurrentPos);
             }
             else
             {
-                mainGame.SetNextFlagForPlayer(this);
+                ///mainGame.SetNextFlagForPlayer(this);
             }
 
             Damage = p_StartingDamage;
@@ -193,13 +194,13 @@ namespace MRR_CLG
         /// Initialize player
         /// </summary>
         /// <param name="p_ID"></param>
-        public Player(RRGame mainGame, int p_ID)
+        public Player(Database DBConn, int p_ID)
             //: this(p_ID, new RobotLocation(), new RobotLocation(), new RobotLocation(), conTotalDamage, conTotalLives, 0, conTotalFlags)
         {
             //SetPlayer(mainGame, p_ID, ToString(), new RobotLocation(), new RobotLocation(), new RobotLocation(), conTotalDamage, conTotalLives, 0, tShutDown.None, true, new string((char)(48 + p_ID), 4), p_ID, false);
             int currentlives = conTotalLives;
-            if ((mainGame != null) && (mainGame.g_BoardElements != null)) currentlives = mainGame.g_BoardElements.Lives;
-            SetPlayer(mainGame, p_ID, ToString(), new RobotLocation(), new RobotLocation(), new RobotLocation(), conTotalDamage, currentlives, 0, tShutDown.None, true, false,0);
+            //if ((mainGame != null) && (mainGame.g_BoardElements != null)) currentlives = mainGame.g_BoardElements.Lives;
+            SetPlayer(DBConn, p_ID, ToString(), new RobotLocation(), new RobotLocation(), new RobotLocation(), conTotalDamage, currentlives, 0, tShutDown.None, true, false,0);
             //PlayerColor = Brushes.Gray;
         }
 
@@ -216,7 +217,7 @@ namespace MRR_CLG
 
         public Player CopyPlayer(Player p_Player)
         {
-            SetPlayer(p_Player.MainGame, p_Player.ID, p_Player.Name, p_Player.CurrentPos, p_Player.NextPos, p_Player.ArchivePos, p_Player.Damage, p_Player.Lives, p_Player.LastFlag, p_Player.ShutDown, p_Player.Active, p_Player.ComputerPlayer,p_Player.DamagePoints);
+            SetPlayer(p_Player.DBConn, p_Player.ID, p_Player.Name, p_Player.CurrentPos, p_Player.NextPos, p_Player.ArchivePos, p_Player.Damage, p_Player.Lives, p_Player.LastFlag, p_Player.ShutDown, p_Player.Active, p_Player.ComputerPlayer,p_Player.DamagePoints);
             //GameType = p_Player.GameType;
             NextFlag = p_Player.NextFlag;
             Operator = p_Player.Operator;
@@ -227,7 +228,7 @@ namespace MRR_CLG
             return this;
         }
 
-        public Player(RRGame maingame, MySqlDataReader reader):this(maingame, (int)reader[0])
+        public Player(Database ldb, MySqlDataReader reader):this(ldb, (int)reader[0])
         {
             ID = (int)reader[0];
             Name = reader[0].ToString();
@@ -247,7 +248,8 @@ namespace MRR_CLG
 
 
         [XmlIgnore]
-        public RRGame MainGame { get; set; }
+//        public RRGame MainGame { get; set; }
+        public Database DBConn { get; set; }
 
         public int ID { get; set; }
         public string Name { get; set; }
@@ -255,7 +257,7 @@ namespace MRR_CLG
 
         public int TotalFlags
         {
-            get { return MainGame.TotalFlags; }
+            get { return 5 ; } //MainGame.TotalFlags; }
             set { }
         }
 
@@ -427,8 +429,9 @@ namespace MRR_CLG
             get
             {
                 if (hiddenCardsPlayer != null) return hiddenCardsPlayer;
-                if (MainGame == null) return null;
-                return new CardList(MainGame.GameCards.Where(gc => gc.Owner == ID )); }
+                //if (MainGame == null) return null;
+                //return new CardList(MainGame.GameCards.Where(gc => gc.Owner == ID )); }
+                return null;}
             set { hiddenCardsPlayer = value; }
         }
 
@@ -439,9 +442,10 @@ namespace MRR_CLG
             get
             {
                 if (hiddenOptionCards != null) return hiddenOptionCards;
-                if (MainGame == null) return null;
+                //if (MainGame == null) return null;
 
-                return new OptionCardList(MainGame.OptionCards.Where(gc => gc.Owner == ID));
+                //return new OptionCardList(MainGame.OptionCards.Where(gc => gc.Owner == ID));
+                return null ; 
             }
             set { hiddenOptionCards = value; }
         }
@@ -449,9 +453,9 @@ namespace MRR_CLG
         public bool HasOptionCard(tOptionCardCommandType OptionID)
         {
             if (!this.IsRunning) return false;
-            OptionCard thiscard = MainGame.OptionCards.GetOption(OptionID, this);
-            //OptionCard thiscard = this.OptionCards.GetOption
-            return (thiscard != null);
+            return false;
+            //OptionCard thiscard = MainGame.OptionCards.GetOption(OptionID, this);
+            //return (thiscard != null);
         }
 
         public int LastFlag { get; set; }

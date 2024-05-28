@@ -39,20 +39,16 @@ Get all commands where status >= 3 and status <= 4
     public class PendingCommands : ObservableCollection<PendingCommand>
     {
         private Database DBConn;
-        private RRGame rRGame;
         private Players RobotList;
-        private RRGame lGame;
-        
-        public PendingCommands(RRGame lRGame)
-        {
-            rRGame = lRGame;
 
-            DBConn = rRGame.DBConn;
+        public PendingCommands(Database ldb)
+        {
+            DBConn = ldb;
             //DBConn = ldb;
 
             //lGame = new RRGame(DBConn);
 
-            RobotList = new Players(rRGame); // load robot list from db
+            RobotList = new Players(DBConn); // load robot list from db
 
         }
 
@@ -97,8 +93,8 @@ Get all commands where status >= 3 and status <= 4
 
         public bool ProcessCommands()
         {
-            Console.WriteLine("Process Commands State: " + lGame.GameState);
-            if (lGame.GameState != 8) return true; // all commands are processed
+            //Console.WriteLine("Process Commands State: " + lGame.GameState);
+            //if (lGame.GameState != 8) return true; // all commands are processed
             bool stillRunning = true;
 
             // are there commands that need processing?

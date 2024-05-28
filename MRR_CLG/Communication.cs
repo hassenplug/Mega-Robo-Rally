@@ -6,12 +6,12 @@ namespace MRR_CLG
 {
     public class Communication
     {
-        public Communication(RRGame lRGame)
+        public Communication(Database ldb)
         {
-            rRGame = lRGame;
+            DBConn = ldb;
         }
 
-        private RRGame rRGame { get; set; }
+        private Database DBConn { get; set; }
 
         private static TcpListener myTCPListener;
         private static IPAddress TCPAddr = IPAddress.Parse("0.0.0.0");
@@ -55,7 +55,7 @@ namespace MRR_CLG
             //Console.WriteLine("query:" + sout[sout.Length-1]);
             var newQuery = "Select * from " + sout[sout.Length-1] + ";";
             //var newQuery = "" + sout[sout.Length-1] + ";";
-            return rRGame.DBConn.GetHTMLfromQuery(newQuery);
+            return DBConn.GetHTMLfromQuery(newQuery);
         }
 
         private string GetLED(string query)
@@ -84,18 +84,18 @@ namespace MRR_CLG
                 case "1": 
                     string cardid = requestSplit[4];
                     string position = requestSplit[5];
-                    rRGame.DBConn.Command("call procUpdateCardPlayed(" + playerid + "," + cardid + "," + position + ");");
+                    DBConn.Command("call procUpdateCardPlayed(" + playerid + "," + cardid + "," + position + ");");
                     // check to see if we an go to next state
                     break;
                 case "2":
                     string positionValid = requestSplit[4];
                     // clear message
-                    rRGame.DBConn.Command("update Robots set PositionValid=" + positionValid + " where RobotID=" + playerid + ";");
+                    DBConn.Command("update Robots set PositionValid=" + positionValid + " where RobotID=" + playerid + ";");
                     break;
                 case "3":
-                    int markcommand = rRGame.DBConn.GetIntFromDB("Select MessageCommandID from Robots where RobotID=" + playerid);
-                    rRGame.DBConn.Command("update Robots set MessageCommandID=null where RobotID=" + playerid + ";");
-                    rRGame.DBConn.Command("update CommandList set StatusID=6 where CommandID=" + markcommand + ";");
+                    int markcommand = DBConn.GetIntFromDB("Select MessageCommandID from Robots where RobotID=" + playerid);
+                    DBConn.Command("update Robots set MessageCommandID=null where RobotID=" + playerid + ";");
+                    DBConn.Command("update CommandList set StatusID=6 where CommandID=" + markcommand + ";");
                     break;
 
             }
@@ -103,19 +103,12 @@ namespace MRR_CLG
             //select funcGetNextGameState();
             
             //var gamestate = rDBConn.Exec("select funcGetNextGameState();"); //going to next state?
-            var gamestate = rRGame.DBConn.Command("select funcGetNextGameState();"); //going to next state?
+            var gamestate = DBConn.Command("select funcGetNextGameState();"); //going to next state?
             
-            if (rRGame.UpdateGameState() == 6)
-            {
-                rRGame.ExecuteTurn();
-            }
-           // Console.WriteLine(gamestate);
-            //Console.WriteLine( "Game State:",gamestate);
-            //if (gamestate == 6)
-            //{
-            //    Console.WriteLine( rRGame.ExecuteTurn());
-            //}
-            //rDBConn.Command("select funcGetNextGameState();"); //going to next state?
+            ///if (rRGame.UpdateGameState() == 6)
+            ///{
+            ///    rRGame.ExecuteTurn();
+            ///}
             return MakeRobotsJson(request);
 
         }
@@ -226,7 +219,7 @@ namespace MRR_CLG
 
             if (requestedPath == "/executeturn")
             {
-                return  Encoding.ASCII.GetBytes( rRGame.ExecuteTurn());
+                return  Encoding.ASCII.GetBytes(""); //rRGame.ExecuteTurn());
             }
             else if (requestedPath == "/makerobotsjson")
             {
@@ -259,7 +252,7 @@ namespace MRR_CLG
             }
             else if (requestedPath.Contains("dbeditor"))
             {
-               return  Encoding.ASCII.GetBytes(rRGame.DBConn.GetEditor(requestedPath));
+               return  Encoding.ASCII.GetBytes(DBConn.GetEditor(requestedPath));
             }
             else if (requestedPath.Length > 13 && requestedPath.Substring(1,12) == "updatePlayer")
             {
@@ -318,7 +311,7 @@ namespace MRR_CLG
         public  string MakeCardJson(int playerID)
         {
             string strSQL = "Select * from MoveCards where Owner=" + playerID.ToString() + " order by CardID";
-            string result = rRGame.DBConn.jsonFromQuery(strSQL);
+            string result = DBConn.jsonFromQuery(strSQL);
 //            result = result.Replace("\"Cardlist["+playerID+"]\"", result1);
             return result;
 
@@ -328,7 +321,7 @@ namespace MRR_CLG
         public  string MakeRobotsJson(string filename)
         {
             string strSQL = "select * from viewRobots;";
-            string result = rRGame.DBConn.jsonFromQuery(strSQL);
+            string result = DBConn.jsonFromQuery(strSQL);
 
             for (int c=1;c<9;c++)
             {
@@ -342,7 +335,7 @@ namespace MRR_CLG
 
         public  string NextState()
         {
-            var newstate = rRGame.DBConn.GetIntFromDB("select funcGetNextGameState(); ");
+            var newstate = DBConn.GetIntFromDB("select funcGetNextGameState(); ");
             Console.WriteLine("next:" + newstate.ToString());
             return "State:" + newstate.ToString();
         }
@@ -352,12 +345,12 @@ namespace MRR_CLG
             string[] sout = request.Split('/');
             if (sout[sout.Length-1] != "startgame")
             {
-                rRGame.DBConn.Command("Update CurrentGameData set iValue = " + sout[sout.Length-1] + " where iKey = 26;");  // set game state
+                DBConn.Command("Update CurrentGameData set iValue = " + sout[sout.Length-1] + " where iKey = 26;");  // set game state
             }
 
-            rRGame.DBConn.Command("Update CurrentGameData set iValue = 0 where iKey = 10;");  // set state to 0
+            DBConn.Command("Update CurrentGameData set iValue = 0 where iKey = 10;");  // set state to 0
 
-            var startstate = rRGame.DBConn.GetIntFromDB("select funcGetNextGameState(); ");
+            var startstate = DBConn.GetIntFromDB("select funcGetNextGameState(); ");
             //Console.WriteLine("next:" + newstate.ToString());
             return "New Game:" + startstate.ToString();
         }
@@ -376,7 +369,7 @@ namespace MRR_CLG
                 // for column
                 int boardid;
                 int.TryParse( sout[sout.Length-1],out boardid);
-                rRGame.BoardLoadFromDB(boardid);
+                ///rRGame.BoardLoadFromDB(boardid);
                 //rRGame.
                 //foreach()
             }

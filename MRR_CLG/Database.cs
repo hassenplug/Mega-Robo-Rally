@@ -1,4 +1,5 @@
-﻿using MySqlConnector;
+﻿using System.Data;
+using MySqlConnector;
 
 namespace MRR_CLG
 {
@@ -14,7 +15,7 @@ namespace MRR_CLG
         public MySqlConnection Connect()
         {
             string myConnectionString = "server=mrobopi3;uid=mrr;pwd=rallypass;database=rally;";
-            
+
             try
             {
                 Conn = new MySqlConnection();
@@ -219,5 +220,106 @@ namespace MRR_CLG
 
             return output;
         }
+
+
+        public BoardElementCollection BoardLoadFromDB(int sourceID)
+        {
+            BoardElementCollection l_BoardElements = new BoardElementCollection();
+            string strSQL;
+            BoardActionsCollection squareActions = new BoardActionsCollection();
+
+            strSQL = "Select X,Y,SquareAction,ActionSequence,Phase,Parameter from BoardItemActions where BoardID=" + sourceID + ";";
+            MySqlConnector.MySqlDataReader actionReader = Exec(strSQL);
+            while (actionReader.Read())
+            {
+                BoardAction oneAction = new BoardAction((SquareAction)actionReader["SquareAction"], (int)actionReader["Parameter"], (int)actionReader["ActionSequence"], (int)actionReader["Phase"]);
+                oneAction.SquareX = (int)actionReader["X"];
+                oneAction.SquareY = (int)actionReader["Y"];
+                squareActions.Add(oneAction);
+
+            }
+
+            actionReader.Close();
+
+
+            l_BoardElements = new BoardElementCollection();
+            strSQL = "Select X,Y,SquareType,Rotation from BoardItems where BoardID=" + sourceID + ";";
+            MySqlConnector.MySqlDataReader reader = Exec(strSQL);
+            while (reader.Read())
+            {
+                int boardX = (int)reader["X"];
+                int boardY = (int)reader["Y"];
+                if (boardX + 1 > l_BoardElements.BoardCols) l_BoardElements.BoardCols = boardX + 1;
+                if (boardY + 1 > l_BoardElements.BoardRows) l_BoardElements.BoardRows = boardY + 1;
+
+                BoardActionsCollection boardSquareActions = new BoardActionsCollection();
+
+                foreach(BoardAction thisaction in squareActions.Where(sa => sa.SquareX == boardX && sa.SquareY == boardY))
+                {
+                    boardSquareActions.Add(thisaction);
+                }
+
+                l_BoardElements.SetSquare(boardX, boardY,(SquareType)reader["SquareType"],(Direction)reader["Rotation"],boardSquareActions);
+            }
+
+            reader.Close();
+            return l_BoardElements;
+        }
+
+        public void BoardSaveToDB(int destinationID, BoardElementCollection l_BoardElements)
+        {
+            Command("Delete from BoardItems where BoardID=" + destinationID + ";");
+            Command("Delete from BoardItemActions where BoardID=" + destinationID + ";");
+            //  loop through cells
+            //  loop through actions
+            foreach(BoardElement thisSquare in l_BoardElements.BoardElements)
+            {
+                string strSQL = "insert into BoardItems " +
+                    "(BoardID, X, Y, SquareType, Rotation) " +
+                    " values (" + destinationID + "," + thisSquare.BoardCol + "," + thisSquare.BoardRow + "," + (int)thisSquare.Type + "," + (int)thisSquare.Rotation + ")";
+
+                Command(strSQL);
+                
+                foreach (BoardAction thisAction in thisSquare.ActionList)
+                {
+                    //ActionList.Add(thisaction);
+                    //DBConn.Command("Update CurrentGameData set GameState=0, Message='loaded " + boardcount + "boards'; ");
+                    strSQL = "insert into BoardItemActions " +
+                        "(BoardID, X, Y, SquareAction, ActionSequence, Phase, Parameter) " +
+                        " values (" + destinationID + "," + thisSquare.BoardCol + "," + thisSquare.BoardRow +
+                        "," + (int)thisAction.SquareAction + "," + thisAction.ActionSequence + "," + thisAction.Phase + "," + thisAction.Parameter + ")";
+                    Command(strSQL);
+
+                    strSQL = "Update Boards set " +
+                        " X=" + l_BoardElements.BoardCols.ToString() +
+                        ", Y=" + l_BoardElements.BoardRows.ToString() +
+                        ", GameType=" + (int)l_BoardElements.GameType +
+                        ", TotalFlags=" + l_BoardElements.TotalFlags.ToString() +
+                        ", LaserDamage=" + l_BoardElements.LaserDamage.ToString() +
+                        " where BoardID=" + destinationID.ToString();
+                    Command(strSQL);
+                }
+            }
+        }
+        
+        public bool SendGameMessage(int NewState, string NewMessage)
+        {
+            if (Conn.State == System.Data.ConnectionState.Open)
+            {
+                Command("Update CurrentGameData set iValue=" + NewState + " where iKey=10;");
+                Command("Update CurrentGameData set sValue='" + NewMessage + "' where iKey=16;");
+            }
+            return true;
+
+        }
+
+        public void ResetGameState()
+        {
+            // clear connections
+            // set active commands to ready
+            // set game data as needed
+        }
+
     }
+
 }

@@ -51,6 +51,10 @@ namespace MRR_CLG
 
         public int Lives { get; set; } = 3; // { get { return _lives; } set { _lives = value; } }
 
+        public int TotalFlags {get;set;}
+
+        public int GameType {get;set;}
+
         public ObservableCollection<BoardElement> BoardElements { get; set; }
 
         [XmlIgnore]

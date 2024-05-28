@@ -37,10 +37,10 @@ namespace MRR_CLG
 
         public void ClearFromPlayer(OptionCard removeCard, Player fromPlayer)
         {
-            RRGame maingame = fromPlayer.MainGame;
+            //RRGame maingame = fromPlayer.MainGame;
             // need to clear from whole list, not from player list..
-            maingame.OptionCards.Remove(removeCard);
-            maingame.ListOfCommands.AddCommand(fromPlayer, SquareAction.DestroyOptionCard, removeCard.ID);
+            //maingame.OptionCards.Remove(removeCard);
+            //maingame.ListOfCommands.AddCommand(fromPlayer, SquareAction.DestroyOptionCard, removeCard.ID);
 
         }
 
