@@ -44,9 +44,6 @@ Get all commands where status >= 3 and status <= 4
         public PendingCommands(Database ldb)
         {
             DBConn = ldb;
-            //DBConn = ldb;
-
-            //lGame = new RRGame(DBConn);
 
             RobotList = new Players(DBConn); // load robot list from db
 

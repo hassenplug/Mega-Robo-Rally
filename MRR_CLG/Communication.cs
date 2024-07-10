@@ -9,24 +9,29 @@ namespace MRR_CLG
         public Communication(Database ldb)
         {
             DBConn = ldb;
+            createCommands = new(DBConn);
+            rLEDs = new LEDs();
         }
 
         private Database DBConn { get; set; }
 
-        private static TcpListener myTCPListener;
-        private static IPAddress TCPAddr = IPAddress.Parse("0.0.0.0");
-        private static int TCPport = 5050;
-        private static UdpClient udpServer;
-        private static int UDPport = 5010;
+        private TcpListener myTCPListener;
+        private IPAddress TCPAddr = IPAddress.Parse("0.0.0.0");
+        private int TCPport = 5050;
+        private UdpClient udpServer;
+        private int UDPport = 5010;
 
-        private static string WebServerPath = "../web";
-        private static string serverEtag = Guid.NewGuid().ToString("N");
+        private string WebServerPath = "../web";
+        private string serverEtag = Guid.NewGuid().ToString("N");
 
-        private static Dictionary<IPAddress, TcpClient> clientlist = new Dictionary<IPAddress, TcpClient>();
+        private Dictionary<IPAddress, TcpClient> clientlist = new Dictionary<IPAddress, TcpClient>();
+
+        private CreateCommands createCommands;
+
+        private LEDs rLEDs;
 
 
         public void StartServer()
-        //static void Main(string[] args)
         {
             try
             {
@@ -64,7 +69,8 @@ namespace MRR_CLG
             int iout;
             int.TryParse(sout[sout.Length-1], out iout);
             //Console.WriteLine("query:" + sout[sout.Length-1]);
-            return ""; // rRGame.rLED.Animation(iout);
+            //return ""; // rRGame.rLED.Animation(iout);
+            return  rLEDs.Animation(iout);
         }
 
         // commands
@@ -105,15 +111,16 @@ namespace MRR_CLG
             //var gamestate = rDBConn.Exec("select funcGetNextGameState();"); //going to next state?
             var gamestate = DBConn.Command("select funcGetNextGameState();"); //going to next state?
             
-            ///if (rRGame.UpdateGameState() == 6)
-            ///{
-            ///    rRGame.ExecuteTurn();
-            ///}
+            //if (createCommands.UpdateGameState() == 6)
+            if (gamestate == 6)
+            {
+                createCommands.ExecuteTurn();
+            }
             return MakeRobotsJson(request);
 
         }
 
-        static void HandleConnection(TcpClient client)
+        void HandleConnection(TcpClient client)
         {
 
             NetworkStream stream = client.GetStream();
@@ -151,8 +158,8 @@ namespace MRR_CLG
                     }
                 }
 
-                //var fileContent = GetContent(requestedPath);
-                var fileContent = new byte[] {  };
+                var fileContent = GetContent(requestedPath);
+                //var fileContent = new byte[] {  };
                 if(fileContent is not null)
                 {
                     SendHeaders(httpVersion, 200, "OK", contentType, contentEncoding, 0, ref stream);
@@ -168,7 +175,7 @@ namespace MRR_CLG
 
         }
 
-        private static async void Send_UDP_Message(IPEndPoint destination, byte message)
+        private async void Send_UDP_Message(IPEndPoint destination, byte message)
         {
             // receivedResult.RemoteEndPoint
             // send message
@@ -182,7 +189,7 @@ namespace MRR_CLG
             Console.WriteLine($"Sent response to {destination}");
         }
 
-        private static async void Start_UDP_Server()
+        private async void Start_UDP_Server()
         {
             var counter = 0;
 
@@ -198,7 +205,7 @@ namespace MRR_CLG
             }
         }
 
-        private static void Start_TCP_Listen()
+        private void Start_TCP_Listen()
         {
             while (true)
             {
@@ -219,7 +226,8 @@ namespace MRR_CLG
 
             if (requestedPath == "/executeturn")
             {
-                return  Encoding.ASCII.GetBytes(""); //rRGame.ExecuteTurn());
+                //return  Encoding.ASCII.GetBytes(""); //rRGame.ExecuteTurn());
+                return  Encoding.ASCII.GetBytes(createCommands.ExecuteTurn());
             }
             else if (requestedPath == "/makerobotsjson")
             {
@@ -256,8 +264,9 @@ namespace MRR_CLG
             }
             else if (requestedPath.Length > 13 && requestedPath.Substring(1,12) == "updatePlayer")
             {
+                return  Encoding.ASCII.GetBytes(UpdatePlayer(requestedPath)) ; //Encoding.ASCII.GetBytes(MakeRobotsJson(filePath));
                 //return  Encoding.ASCII.GetBytes(UpdatePlayer(requestedPath)) ; //Encoding.ASCII.GetBytes(MakeRobotsJson(filePath));
-                return  Encoding.ASCII.GetBytes(""); //Encoding.ASCII.GetBytes(UpdatePlayer(requestedPath)) ; //Encoding.ASCII.GetBytes(MakeRobotsJson(filePath));
+                //return  Encoding.ASCII.GetBytes(""); //Encoding.ASCII.GetBytes(UpdatePlayer(requestedPath)) ; //Encoding.ASCII.GetBytes(MakeRobotsJson(filePath));
             }
             else if (!File.Exists(filePath)) 
             {
@@ -271,7 +280,7 @@ namespace MRR_CLG
         }
 
 //        private static void SendHeaders(string? httpVersion, int statusCode, string statusMsg, string? contentType, string? contentEncoding,
-        private static void SendHeaders(string httpVersion, int statusCode, string statusMsg, string contentType, string contentEncoding,
+        private void SendHeaders(string httpVersion, int statusCode, string statusMsg, string contentType, string contentEncoding,
             int byteLength, ref NetworkStream networkStream)
         {
             string responseHeaderBuffer = "";
@@ -289,7 +298,7 @@ namespace MRR_CLG
             networkStream.Write(responseBytes, 0, responseBytes.Length);
         }
 
-        private static (Dictionary<string, string> headers, string requestType) ParseHeaders(string headerString)
+        private (Dictionary<string, string> headers, string requestType) ParseHeaders(string headerString)
         {
             var headerLines = headerString.Split('\r', '\n');
             string firstLine = headerLines[0];
