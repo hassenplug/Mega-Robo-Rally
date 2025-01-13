@@ -47,7 +47,8 @@ namespace MRR_CLG
         public int OptionsOnStartup { get; set; } = -1;
 
         private int _laserDamage = 1;
-        public int LaserDamage { get { return _laserDamage; } set { _laserDamage = value; OnPropertyChanged("LaserDamage"); } }
+        public int LaserDamage { get { return _laserDamage; } set { _laserDamage = value; } }
+        //public int LaserDamage { get { return _laserDamage; } set { _laserDamage = value; OnPropertyChanged("LaserDamage"); } }
 
         public int Lives { get; set; } = 3; // { get { return _lives; } set { _lives = value; } }
 
@@ -265,10 +266,10 @@ namespace MRR_CLG
             set
             {
                 l_totalused = value;
-                OnPropertyChanged("TotalUsed");
-                OnPropertyChanged("TotalRemaining");
-                OnPropertyChanged("BGColor");
-                OnPropertyChanged("Panel");
+                //OnPropertyChanged("TotalUsed");
+                //OnPropertyChanged("TotalRemaining");
+                //OnPropertyChanged("BGColor");
+                //OnPropertyChanged("Panel");
             }
         }
 
@@ -653,12 +654,12 @@ namespace MRR_CLG
         public void Update()
         {
             //BuildImage();
-            OnPropertyChanged("Panel");
-            OnPropertyChanged("Rotation");
-            OnPropertyChanged("SquareImage");
-            OnPropertyChanged("ActionCount");
-            OnPropertyChanged("TotalRemaining");
-            OnPropertyChanged("BGColor");
+            //OnPropertyChanged("Panel");
+            //OnPropertyChanged("Rotation");
+            //OnPropertyChanged("SquareImage");
+            //OnPropertyChanged("ActionCount");
+            //OnPropertyChanged("TotalRemaining");
+            //OnPropertyChanged("BGColor");
         }
 
         [XmlIgnore]
@@ -728,8 +729,8 @@ namespace MRR_CLG
             set
             {
                 l_Phase = value;
-                OnPropertyChanged("Phase");
-                OnPropertyChanged("ShowPhase");
+                //OnPropertyChanged("Phase");
+                //OnPropertyChanged("ShowPhase");
             }
         }
         private int l_parameter;
@@ -748,7 +749,7 @@ namespace MRR_CLG
             set
             {
                 l_parameter = value;
-                OnPropertyChanged("Parameter");
+                //OnPropertyChanged("Parameter");
             }
         }
 

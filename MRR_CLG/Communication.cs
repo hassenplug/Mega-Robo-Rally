@@ -1,6 +1,10 @@
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
+using System.Collections.ObjectModel;
+using System.ComponentModel; // INotifyPropertyChanged
+using System.Xml.Serialization; // serializer
+
 
 namespace MRR_CLG
 {
@@ -367,22 +371,75 @@ namespace MRR_CLG
         public  string EditBoard(string request)
         {
             string[] sout = request.Split('/');
+            int boardid;
+
             if (sout[sout.Length-1] == "editboard")
             {
                 // combo box board selector
+                // get board id for current board
+                boardid = 1;
             }
             else
             {
                 // table with board
                 // for row
                 // for column
-                int boardid;
                 int.TryParse( sout[sout.Length-1],out boardid);
-                ///rRGame.BoardLoadFromDB(boardid);
-                //rRGame.
-                //foreach()
+
             }
-            return "";
+
+            BoardElementCollection g_BoardElements = DBConn.BoardLoadFromDB(boardid);
+
+            ///rRGame.BoardLoadFromDB(boardid);
+            //rRGame.
+            //foreach()
+
+            string output = "<html><head>";
+            output += "<script src='/jscode.js' type='text/javascript' charset='utf-8'></script>";
+            output += "</head><body><table border=1>";
+            for(int y=0;y<g_BoardElements.BoardRows;y++)
+            {
+                output += "<tr>";
+                for(int x=0;x<g_BoardElements.BoardCols;x++)
+                {
+                    //Console.WriteLine("line: {0:D} {1:D} " , y , x );
+                    BoardElement l_square = g_BoardElements.GetSquare(x, y);
+                    if (l_square!= null)
+                    {                        
+                        //<img src="your image" style="transform:rotate(90deg);">
+                        //<img id="image_canv" src="/image.png" class="rotate90">
+                        string onecell = l_square.Type.ToString() ;
+                        if (l_square.Rotation != Direction.None)
+                        {
+                            onecell += "-" + l_square.Rotation.ToString();
+                        }
+
+                        onecell += "<br>";
+/*
+                        foreach(BoardAction eachAction in l_square.ActionList)
+                        {
+                            onecell += eachAction.SquareAction.ToString() + "-";
+                            onecell += eachAction.ActionSequence.ToString() + "-";
+                            onecell += eachAction.Phase.ToString() + "-";
+                            onecell += eachAction.Parameter.ToString() + "<br>";
+                            //onecell += "<br>";
+                        }
+                        */
+
+                        output += "<td>" + onecell + "</td>";
+                    }
+                    
+                }
+                output += "</tr>";
+            }
+            //output += "<h1>Board Editor</h1>";
+            //output +=  GetTableNames(newQuery);
+            //newQuery = "Select * from " + newQuery;
+            //output += GetHTMLfromQuery(newQuery);
+            output += "</table></body></html>";
+
+            //Console.WriteLine("output:" + output);
+            return output;
         }
 
 
