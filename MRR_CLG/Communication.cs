@@ -396,7 +396,9 @@ namespace MRR_CLG
 
             string output = "<html><head>";
             output += "<script src='/jscode.js' type='text/javascript' charset='utf-8'></script>";
-            output += "</head><body><table border=1>";
+            output += "<style>html, body {    height: 100%;    margin: 0;    padding: 0;} img {    padding: 0;    display: block;    margin: 0 auto;    max-height: 100%;    max-width: 100%;}  th, td {  padding: 0px;}  </style>";
+
+            output += "</head><body><table>";
             for(int y=0;y<g_BoardElements.BoardRows;y++)
             {
                 output += "<tr>";
@@ -408,6 +410,7 @@ namespace MRR_CLG
                     {                        
                         //<img src="your image" style="transform:rotate(90deg);">
                         //<img id="image_canv" src="/image.png" class="rotate90">
+                        /*
                         string onecell = l_square.Type.ToString() ;
                         if (l_square.Rotation != Direction.None)
                         {
@@ -415,6 +418,7 @@ namespace MRR_CLG
                         }
 
                         onecell += "<br>";
+                        */
 /*
                         foreach(BoardAction eachAction in l_square.ActionList)
                         {
@@ -425,8 +429,11 @@ namespace MRR_CLG
                             //onecell += "<br>";
                         }
                         */
+                        //<img src="your image" style="transform:rotate(90deg);">
 
-                        output += "<td>" + onecell + "</td>";
+                        int[] rot = {0,0,90,180,270,360};
+
+                        output += "<td><img src='/images/Element" + ((int)l_square.Type) + ".jpg' style='transform:rotate(" + rot[(int)l_square.Rotation] + "deg);'></td>";
                     }
                     
                 }
